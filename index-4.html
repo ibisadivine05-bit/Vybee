@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7e6ee">
+  <title>VYBE — Find your people</title>
+  <meta name="description" content="VYBE is a space to discover people, interests and connections. There's space for everyone.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
+    :root {
+      --pink:#e8a9c3; --pink-deep:#b94f7a; --pink-pale:#f9eaf0;
+      --cream:#fffaf6; --paper:#ffffff; --ink:#2b2026; --muted:#796a72;
+      --line:#f0dfe6; --wine:#6e2946; --green:#456d5b;
+      --shadow:0 16px 45px rgba(99,44,68,.08); --radius:24px;
+    }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background:var(--cream); color:var(--ink); font-family:"DM Sans",system-ui,sans-serif; }
+    button,input,textarea,select { font:inherit; }
+    button { cursor:pointer; }
+    button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible { outline:3px solid #ce7fa0; outline-offset:3px; }
+    .app-shell { min-height:100vh; display:grid; grid-template-columns:245px minmax(0,1fr); }
+    .sidebar { position:sticky; top:0; height:100vh; padding:28px 18px; border-right:1px solid var(--line); background:rgba(255,250,246,.92); display:flex; flex-direction:column; gap:26px; }
+    .brand { display:flex; align-items:center; gap:11px; padding:0 10px; }
+    .brand-mark { width:43px; height:43px; display:grid; place-items:center; border-radius:15px 15px 15px 5px; background:var(--pink-deep); color:white; font:700 25px "Playfair Display",serif; box-shadow:0 7px 18px #b94f7a30; }
+    .brand-name { font:700 27px "Playfair Display",serif; letter-spacing:.5px; }
+    .brand-tag { color:var(--muted); font-size:11px; margin-top:1px; }
+    .nav-label { padding:0 13px; color:#a08b95; font-size:10px; font-weight:700; letter-spacing:1.8px; text-transform:uppercase; }
+    .nav-list { display:grid; gap:7px; }
+    .nav-btn { display:flex; align-items:center; gap:13px; width:100%; border:0; border-radius:15px; background:transparent; color:#67535d; padding:13px 14px; text-align:left; font-weight:600; transition:.2s; }
+    .nav-btn .icon { width:22px; text-align:center; font-size:19px; }
+    .nav-btn:hover,.nav-btn.active { background:var(--pink-pale); color:var(--wine); }
+    .sidebar-bottom { margin-top:auto; }
+    .safe-note { background:#f8edf1; border:1px solid var(--line); padding:16px; border-radius:18px; font-size:12px; color:#765363; line-height:1.55; }
+    .safe-note strong { display:block; color:var(--wine); margin-bottom:5px; }
+    .main { min-width:0; }
+    .topbar { height:77px; padding:0 clamp(18px,4vw,54px); display:flex; align-items:center; justify-content:space-between; gap:16px; border-bottom:1px solid var(--line); background:#fffaf6d9; backdrop-filter:blur(12px); position:sticky; top:0; z-index:10; }
+    .topbar-title { font:600 21px "Playfair Display",serif; }
+    .topbar-actions { display:flex; align-items:center; gap:10px; }
+    .avatar-placeholder { width:37px; height:37px; border-radius:50%; background:var(--pink-pale); color:var(--wine); display:grid; place-items:center; font-size:16px; border:1px solid #edcbd9; }
+    .btn { border:0; border-radius:999px; padding:11px 17px; font-weight:700; transition:transform .18s,box-shadow .18s; }
+    .btn:hover { transform:translateY(-1px); }
+    .btn-primary { background:var(--pink-deep); color:white; box-shadow:0 6px 16px #b94f7a22; }
+    .btn-soft { background:var(--pink-pale); color:var(--wine); }
+    .btn-outline { background:transparent; border:1px solid var(--line); color:var(--wine); }
+    .btn-small { padding:8px 12px; font-size:12px; }
+    .content { width:min(1100px,100%); padding:clamp(22px,4vw,48px); margin:0 auto; }
+    .view { display:none; animation:fadeIn .24s ease; }
+    .view.active { display:block; }
+    @keyframes fadeIn { from {opacity:0;transform:translateY(5px)} to {opacity:1;transform:none} }
+    .eyebrow { color:var(--pink-deep); text-transform:uppercase; font-size:11px; font-weight:700; letter-spacing:2px; }
+    h1,h2,h3,p { margin-top:0; }
+    h1,h2,h3 { font-family:"Playfair Display",Georgia,serif; font-weight:600; }
+    h1 { font-size:clamp(34px,5vw,56px); line-height:1.08; letter-spacing:-1.2px; margin:12px 0 16px; }
+    h2 { font-size:clamp(26px,3vw,35px); margin-bottom:10px; }
+    h3 { font-size:21px; margin-bottom:8px; }
+    .lead { color:var(--muted); line-height:1.75; max-width:640px; }
+    .hero { position:relative; overflow:hidden; border-radius:32px; padding:clamp(26px,5vw,54px); background:linear-gradient(120deg,#f9e7ef 0%,#fff4ed 62%,#f8e8d8 100%); border:1px solid #f0d8e2; }
+    .hero:after { content:""; position:absolute; width:230px; height:230px; border:1px solid #d994b2; border-radius:50%; right:-55px; top:-70px; box-shadow:0 0 0 24px #ffffff24,0 0 0 50px #ffffff24; pointer-events:none; }
+    .hero-content { position:relative; z-index:1; max-width:640px; }
+    .hero .lead { color:#745764; }
+    .hero-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:25px; }
+    .hero-footnote { font-size:12px; color:#856d79; margin-top:20px; }
+    .section-heading { display:flex; justify-content:space-between; align-items:end; gap:18px; margin:34px 0 16px; }
+    .section-heading p { color:var(--muted); margin:0; font-size:13px; }
+    .grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .feature-card,.panel,.post-card,.form-card,.empty-card { border:1px solid var(--line); border-radius:var(--radius); background:var(--paper); box-shadow:var(--shadow); }
+    .feature-card { padding:22px; min-height:155px; }
+    .feature-icon { width:42px; height:42px; display:grid; place-items:center; background:var(--pink-pale); border-radius:14px; font-size:20px; margin-bottom:16px; }
+    .feature-card h3 { font-size:19px; }
+    .feature-card p { color:var(--muted); font-size:13px; line-height:1.6; margin:0; }
+    .notice { border:1px solid #ecd4de; background:#fff3f7; color:#75465b; padding:14px 16px; border-radius:16px; font-size:13px; line-height:1.55; }
+    .two-col { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(240px,.7fr); gap:20px; align-items:start; }
+    .panel { padding:24px; }
+    .form-card { padding:clamp(22px,4vw,36px); max-width:680px; margin:0 auto; }
+    .field { display:grid; gap:7px; margin:16px 0; }
+    .field label { font-size:13px; font-weight:700; color:#59424e; }
+    .field input,.field textarea,.field select { width:100%; padding:13px 14px; border:1px solid #e8d5de; border-radius:13px; background:#fffdfc; color:var(--ink); }
+    .field textarea { resize:vertical; min-height:95px; }
+    .hint { color:var(--muted); font-size:12px; line-height:1.5; }
+    .chip-row { display:flex; flex-wrap:wrap; gap:8px; }
+    .chip { display:inline-flex; align-items:center; border:1px solid #ead2dc; color:#775263; background:#fff8fb; border-radius:999px; padding:8px 12px; font-size:12px; }
+    .chip.selected { background:var(--wine); color:white; border-color:var(--wine); }
+    .empty-card { padding:clamp(24px,5vw,45px); text-align:center; box-shadow:none; border-style:dashed; background:rgba(255,255,255,.68); }
+    .empty-art { font-size:36px; margin-bottom:12px; }
+    .empty-card p { color:var(--muted); max-width:480px; line-height:1.7; margin:0 auto 18px; }
+    .feed-compose { display:grid; gap:12px; margin-bottom:18px; }
+    .feed-compose textarea { min-height:90px; border:1px solid var(--line); border-radius:16px; padding:15px; resize:vertical; }
+    .compose-bottom { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+    .post-list { display:grid; gap:14px; }
+    .post-card { padding:20px; box-shadow:none; }
+    .post-meta { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+    .post-meta strong { display:block; font-size:13px; }
+    .post-meta small { display:block; color:var(--muted); margin-top:3px; font-size:11px; }
+    .post-body { line-height:1.75; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .post-actions { display:flex; gap:8px; flex-wrap:wrap; border-top:1px solid #f4e8ed; padding-top:12px; margin-top:15px; }
+    .text-button { background:none; border:0; color:#8b6275; padding:8px 10px; border-radius:10px; font-size:12px; }
+    .text-button:hover { background:var(--pink-pale); }
+    .video-box { margin-top:12px; background:#251820; border-radius:18px; overflow:hidden; max-width:440px; }
+    .video-box video { width:100%; max-height:540px; display:block; }
+    .profile-cover { height:120px; border-radius:18px; background:linear-gradient(120deg,#f0c6d7,#fff1e8,#d9b0c2); margin-bottom:-35px; }
+    .profile-avatar { position:relative; margin-left:20px; width:74px; height:74px; border-radius:50%; border:5px solid white; display:grid; place-items:center; background:#fff3f8; color:var(--wine); font-size:29px; }
+    .profile-content { padding:15px 20px 20px; }
+    .profile-content p { color:var(--muted); line-height:1.7; }
+    .stat-row { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0; }
+    .stat-pill { border:1px solid var(--line); border-radius:12px; padding:9px 12px; font-size:12px; color:#755766; }
+    .bottom-nav { display:none; }
+    .toast { position:fixed; left:50%; bottom:24px; transform:translate(-50%,20px); opacity:0; pointer-events:none; background:#2d2027; color:white; padding:12px 18px; border-radius:999px; z-index:99; font-size:13px; box-shadow:var(--shadow); transition:.22s; max-width:calc(100vw - 30px); text-align:center; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+    .muted { color:var(--muted); }
+    .divider { height:1px; background:var(--line); margin:22px 0; }
+    .footer-note { text-align:center; color:#9b8790; font-size:11px; padding:25px 0 10px; }
+    .hide { display:none!important; }
+    @media (max-width:900px) {
+      .app-shell { grid-template-columns:78px minmax(0,1fr); }
+      .sidebar { padding:22px 10px; align-items:center; }
+      .brand { padding:0; }
+      .brand-copy,.nav-label,.nav-text,.safe-note { display:none; }
+      .nav-list { width:100%; }
+      .nav-btn { justify-content:center; padding:13px 8px; }
+      .nav-btn .icon { font-size:21px; }
+      .grid-3 { grid-template-columns:1fr; }
+      .feature-card { min-height:auto; }
+    }
+    @media (max-width:620px) {
+      .app-shell { display:block; padding-bottom:72px; }
+      .sidebar { display:none; }
+      .topbar { height:65px; padding:0 17px; }
+      .topbar-title { font-size:19px; }
+      .content { padding:20px 15px 30px; }
+      .hero { border-radius:24px; }
+      .hero:after { opacity:.45; }
+      .two-col { grid-template-columns:1fr; }
+      .panel { padding:19px; }
+      .bottom-nav { display:grid; grid-template-columns:repeat(5,1fr); position:fixed; bottom:0; left:0; right:0; z-index:20; background:#fffaf6f2; backdrop-filter:blur(15px); border-top:1px solid var(--line); padding:8px 5px calc(8px + env(safe-area-inset-bottom)); }
+      .bottom-nav button { border:0; background:none; color:#8a7580; display:grid; justify-items:center; gap:3px; font-size:10px; padding:4px 0; }
+      .bottom-nav button .icon { font-size:19px; }
+      .bottom-nav button.active { color:var(--wine); font-weight:700; }
+      .topbar .topbar-actions .btn { padding:9px 12px; font-size:12px; }
+      .section-heading { align-items:start; flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">V</div>
+        <div class="brand-copy"><div class="brand-name">VYBE</div><div class="brand-tag">Find your people.</div></div>
+      </div>
+      <div class="nav-label">Your space</div>
+      <nav class="nav-list">
+        <button class="nav-btn active" data-view="home"><span class="icon">⌂</span><span class="nav-text">Home</span></button>
+        <button class="nav-btn" data-view="discover"><span class="icon">⌕</span><span class="nav-text">Discover</span></button>
+        <button class="nav-btn" data-view="feed"><span class="icon">▤</span><span class="nav-text">The feed</span></button>
+        <button class="nav-btn" data-view="communities"><span class="icon">◎</span><span class="nav-text">Interests</span></button>
+        <button class="nav-btn" data-view="profile"><span class="icon">♡</span><span class="nav-text">My profile</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="safe-note"><strong>Connection, not competition.</strong>No public follower counts. No popularity rankings. No fake people. Just room to be yourself.</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-title" id="pageTitle">A little space for you</div>
+        <div class="topbar-actions">
+          <button class="btn btn-outline btn-small" id="themeToggle" type="button" aria-label="Toggle colour mood">☾ Mood</button>
+          <button class="btn btn-primary btn-small" id="topJoin" type="button">Create profile</button>
+          <div class="avatar-placeholder" aria-label="Profile placeholder">♡</div>
+        </div>
+      </header>
+
+      <div class="content">
+        <section class="view active" id="view-home">
+          <div class="hero">
+            <div class="hero-content">
+              <div class="eyebrow">A place to belong</div>
+              <h1>There's space<br>for everyone.</h1>
+              <p class="lead">For the people who never quite fit the mould, the ones looking for their kind of weird, and anyone ready for a connection that feels real. Friendship, dating, new interests, new people. Your pace. Your people.</p>
+              <div class="hero-actions">
+                <button class="btn btn-primary" data-go="signup">Find your people&nbsp; ↗</button>
+                <button class="btn btn-outline" data-go="discover">Explore VYBE</button>
+              </div>
+              <p class="hero-footnote">Adults 18+ · Built for real connections · Made with room for everyone</p>
+            </div>
+          </div>
+
+          <div class="section-heading"><div><div class="eyebrow">The VYBE difference</div><h2>Connection over clout.</h2></div><p>You don't have to perform here.</p></div>
+          <div class="grid-3">
+            <article class="feature-card"><div class="feature-icon">♡</div><h3>Personality first</h3><p>Discover people through shared interests, what matters to you and what you want from a connection, not a popularity score.</p></article>
+            <article class="feature-card"><div class="feature-icon">✳</div><h3>More than dating</h3><p>Make friends, explore a new interest or find romance if that's what you want. You get to define connection.</p></article>
+            <article class="feature-card"><div class="feature-icon">⌁</div><h3>No popularity contest</h3><p>No public follower counts, no hotness rankings and no paying to jump ahead of other people.</p></article>
+          </div>
+          <div class="section-heading"><div><div class="eyebrow">A quick note</div><h2>Real people. Real boundaries.</h2></div></div>
+          <div class="notice">This is VYBE's frontend prototype. It contains no fake member profiles. Your local profile and posts can be previewed in this browser, but accounts, uploads, messages and moderation are not connected to a secure backend yet. Please don't enter a real password or sensitive personal information.</div>
+        </section>
+
+        <section class="view" id="view-signup">
+          <div class="form-card">
+            <div class="eyebrow">Your next chapter</div>
+            <h2>Let's make your corner of VYBE.</h2>
+            <p class="lead">A few basics first. You can be yourself without putting your private details on display.</p>
+            <div class="notice">Prototype only: this form saves a preview to this device. It does not create a real account or verify your age. Real authentication will be added with the backend.</div>
+            <form id="signupForm">
+              <div class="field"><label for="displayName">Display name</label><input id="displayName" required maxlength="30" placeholder="What should people call you?"><span class="hint">This prototype checks uniqueness on this device only. The real version will check across all VYBE accounts.</span></div>
+              <div class="field"><label for="username">Unique username</label><input id="username" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+" placeholder="e.g. ivy_afterhours"><span class="hint">3–20 characters. Letters, numbers and underscores only.</span></div>
+              <div class="field"><label for="ageConfirm">Age</label><select id="ageConfirm" required><option value="">Choose an age range</option><option value="18-20">18–20</option><option value="21-24">21–24</option><option value="25-29">25–29</option><option value="30-35">30–35</option><option value="36+">36+</option></select><span class="hint">VYBE is for adults 18 and over. Your exact date of birth should remain private in the real product.</span></div>
+              <div class="field"><label for="city">City or area (optional)</label><input id="city" maxlength="60" placeholder="e.g. Port Harcourt"></div>
+              <div class="field"><label for="bioInput">A little about you</label><textarea id="bioInput" maxlength="240" placeholder="Your humour, your interests, your current obsession..."></textarea></div>
+              <div class="field"><label>What are you here for?</label><div class="chip-row" id="intentChips"><button class="chip selected" type="button" data-value="Friendship">Friendship</button><button class="chip" type="button" data-value="Dating">Dating</button><button class="chip" type="button" data-value="Open to either">Open to either</button></div></div>
+              <div class="field"><label>Choose a few interests</label><div class="chip-row" id="interestChips">
+                <button type="button" class="chip" data-value="Books">Books</button><button type="button" class="chip" data-value="Music">Music</button><button type="button" class="chip" data-value="Fashion">Fashion</button><button type="button" class="chip" data-value="Film & TV">Film & TV</button><button type="button" class="chip" data-value="Art">Art</button><button type="button" class="chip" data-value="Tech">Tech</button><button type="button" class="chip" data-value="Gaming">Gaming</button><button type="button" class="chip" data-value="Science">Science</button><button type="button" class="chip" data-value="Pop culture">Pop culture</button><button type="button" class="chip" data-value="Food">Food</button><button type="button" class="chip" data-value="Travel">Travel</button><button type="button" class="chip" data-value="Writing">Writing</button>
+              </div><span class="hint">Choose at least one. The full product will also let you add custom interests.</span></div>
+              <div class="field"><label class="hint"><input type="checkbox" id="termsCheck" required style="width:auto;margin-right:7px"> I understand this is a prototype and I agree to treat people with respect.</label></div>
+              <button class="btn btn-primary" type="submit">Preview my profile ↗</button>
+              <button class="btn btn-outline" type="button" data-go="home">Maybe later</button>
+            </form>
+          </div>
+        </section>
+
+        <section class="view" id="view-discover">
+          <div class="eyebrow">A world beyond your usual circle</div>
+          <h1>Discover your kind of people.</h1>
+          <p class="lead">A good recommendation should open a door, not sort humans into a popularity contest.</p>
+          <div class="two-col" style="margin-top:24px">
+            <div class="empty-card">
+              <div class="empty-art">✧ ♡ ✧</div>
+              <h2>It's quiet here. On purpose.</h2>
+              <p>There are no made-up members or AI-generated people pretending to be real. Once VYBE has real members, this space can show people based on shared interests, personality and what they're looking for.</p>
+              <button class="btn btn-primary" data-go="signup">Create the first profile</button>
+            </div>
+            <aside class="panel">
+              <div class="eyebrow">How discovery should work</div>
+              <h3>Shared interests, fresh perspectives.</h3>
+              <p class="muted" style="font-size:13px;line-height:1.7">Recommendations can consider your interests, connection intentions and optional preferences. They should also help you discover new hobbies and communities, rather than trapping you in the same bubble.</p>
+              <div class="divider"></div>
+              <h3>Never for sale</h3>
+              <p class="muted" style="font-size:13px;line-height:1.7">Verification is for safety, not status. Paid themes won't boost your rank. No public follower or connection totals.</p>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-feed">
+          <div class="eyebrow">Ideas, little moments & things you love</div>
+          <h1>The VYBE feed.</h1>
+          <p class="lead">Posts should help you discover people and perspectives, not just keep you scrolling.</p>
+          <div class="notice" style="margin:20px 0">Prototype note: posts are saved only in this browser. They are not uploaded or visible to other people. Don't post private or sensitive information here.</div>
+          <div class="panel feed-compose">
+            <label for="postText"><strong>What's on your mind?</strong></label>
+            <textarea id="postText" maxlength="1200" placeholder="A thought, a hot take, a meme in words, a tiny life update..."></textarea>
+            <div class="compose-bottom"><span class="hint">Be curious. Be kind. Have a personality.</span><button class="btn btn-primary" id="publishPost">Post to my preview</button></div>
+            <div class="divider"></div>
+            <div class="field" style="margin:0"><label for="videoFile">Or preview a short video on this device</label><input id="videoFile" type="file" accept="video/*"><span class="hint">Prototype only. A selected video stays on this device and is not uploaded. The planned Reels-style feature needs secure storage, size limits and moderation.</span></div>
+            <div class="field" style="margin:0"><label for="videoCaption">Video caption (optional)</label><input id="videoCaption" maxlength="200" placeholder="Add a caption"></div>
+            <button class="btn btn-soft" id="publishVideo" type="button">Add video to my preview</button>
+          </div>
+          <div class="post-list" id="postList"><div class="empty-card"><div class="empty-art">✿</div><h3>Your feed starts with you.</h3><p>No fake posts or pretend activity. Add a post above to test how the feed will feel.</p></div></div>
+        </section>
+
+        <section class="view" id="view-communities">
+          <div class="eyebrow">Follow your curiosity</div>
+          <h1>Interests make introductions.</h1>
+          <p class="lead">Communities are places to find people who love what you love, and people who can introduce you to something new.</p>
+          <div class="grid-3" style="margin-top:22px">
+            <article class="feature-card"><div class="feature-icon">📚</div><h3>Book people</h3><p>Fiction, thrillers, romance, fantasy, messy theories and the book you couldn't put down.</p><button class="btn btn-soft btn-small community-pick" data-interest="Books" style="margin-top:15px">Add interest</button></article>
+            <article class="feature-card"><div class="feature-icon">🎬</div><h3>Screen time</h3><p>Series obsessions, film nights, fashion references and characters you'll defend forever.</p><button class="btn btn-soft btn-small community-pick" data-interest="Film & TV" style="margin-top:15px">Add interest</button></article>
+            <article class="feature-card"><div class="feature-icon">🎨</div><h3>Creative corner</h3><p>Design, art, writing, photography and works-in-progress that deserve a little love.</p><button class="btn btn-soft btn-small community-pick" data-interest="Art" style="margin-top:15px">Add interest</button></article>
+            <article class="feature-card"><div class="feature-icon">🪩</div><h3>Style & culture</h3><p>Personal style, music, internet culture, trends and making a look your own.</p><button class="btn btn-soft btn-small community-pick" data-interest="Fashion" style="margin-top:15px">Add interest</button></article>
+            <article class="feature-card"><div class="feature-icon">🧠</div><h3>Curious minds</h3><p>Science, tech, big questions, tiny facts and learning things just because.</p><button class="btn btn-soft btn-small community-pick" data-interest="Science" style="margin-top:15px">Add interest</button></article>
+            <article class="feature-card"><div class="feature-icon">🌍</div><h3>New-to-you</h3><p>Find a hobby, explore another perspective and meet people outside your usual bubble.</p><button class="btn btn-soft btn-small community-pick" data-interest="Travel" style="margin-top:15px">Add interest</button></article>
+          </div>
+          <div class="notice" style="margin-top:22px">These are interest concepts, not live groups with members. Real communities will need moderation tools and clear community rules before launch.</div>
+        </section>
+
+        <section class="view" id="view-profile">
+          <div class="eyebrow">Your space, your terms</div>
+          <h1>My profile.</h1>
+          <p class="lead">The public profile should show what helps people connect with you, not expose your private information.</p>
+          <div id="profilePreview" class="panel" style="padding:0;overflow:hidden;margin-top:22px">
+            <div class="profile-cover"></div><div class="profile-avatar">♡</div>
+            <div class="profile-content"><h2 style="margin:0 0 6px">Your profile is waiting.</h2><p>Make a profile preview to see how your corner of VYBE could look.</p><button class="btn btn-primary" data-go="signup">Create my profile</button></div>
+          </div>
+          <div class="two-col" style="margin-top:20px">
+            <div class="panel"><h3>Privacy by design</h3><p class="muted" style="font-size:13px;line-height:1.7">Your email, exact birth date, private messages and verification data should never appear on your public profile. You choose what personal details to share.</p><p class="muted" style="font-size:13px;line-height:1.7">VYBE should include blocking, reporting, account deletion and controls over who can contact you.</p></div>
+            <div class="panel"><h3>No public scoreboard</h3><p class="muted" style="font-size:13px;line-height:1.7">Other people shouldn't see your follower count, connection total or popularity ranking. You should be able to focus on people, not numbers.</p><button class="btn btn-outline btn-small" id="clearLocal">Clear this device's preview</button></div>
+          </div>
+        </section>
+
+        <div class="footer-note">VYBE · Find your people. Forget the popularity contest.<br>Prototype interface only · Not yet connected to a backend</div>
+      </div>
+    </main>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Mobile navigation">
+    <button class="active" data-view="home"><span class="icon">⌂</span>Home</button>
+    <button data-view="discover"><span class="icon">⌕</span>Discover</button>
+    <button data-view="feed"><span class="icon">▤</span>Feed</button>
+    <button data-view="communities"><span class="icon">◎</span>Interests</button>
+    <button data-view="profile"><span class="icon">♡</span>Profile</button>
+  </nav>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    /*
+      VYBE FRONTEND PROTOTYPE
+      This JavaScript makes the interface interactive in this browser only.
+      It does NOT create real accounts, securely store private data, or connect
+      users to each other. Those require a backend and server-side permissions.
+    */
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+    const STORAGE_KEY = "vybe_frontend_preview_v1";
+    const state = { profile: null, posts: [], intent: "Friendship", interests: new Set(), mood: false };
+
+    function showToast(message) {
+      const toast = $("#toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 2800);
+    }
+
+    function goTo(viewName) {
+      const known = ["home", "signup", "discover", "feed", "communities", "profile"];
+      if (!known.includes(viewName)) viewName = "home";
+      $$(".view").forEach(view => view.classList.toggle("active", view.id === `view-${viewName}`));
+      $$("[data-view]").forEach(button => button.classList.toggle("active", button.dataset.view === viewName));
+      const titles = { home:"A little space for you", signup:"Make your profile", discover:"Discover people", feed:"The VYBE feed", communities:"Interests & communities", profile:"Your profile" };
+      $("#pageTitle").textContent = titles[viewName] || "VYBE";
+      $("#topJoin").classList.toggle("hide", Boolean(state.profile) || viewName === "signup");
+      window.scrollTo({ top:0, behavior:"smooth" });
+    }
+
+    function saveLocal() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          profile: state.profile,
+          posts: state.posts.map(post => ({ id:post.id, text:post.text, type:post.type, caption:post.caption, createdAt:post.createdAt }))
+        }));
+      } catch (error) {
+        showToast("This browser couldn't save the preview. You can still explore the page.");
+      }
+    }
+
+    function loadLocal() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        if (saved && typeof saved === "object") {
+          state.profile = saved.profile || null;
+          state.posts = Array.isArray(saved.posts) ? saved.posts : [];
+        }
+      } catch (error) { /* Ignore invalid local preview data. */ }
+      renderProfile();
+      renderPosts();
+      $("#topJoin").classList.toggle("hide", Boolean(state.profile));
+    }
+
+    $$("[data-view]").forEach(button => button.addEventListener("click", () => goTo(button.dataset.view)));
+    $$("[data-go]").forEach(button => button.addEventListener("click", () => goTo(button.dataset.go)));
+    $("#topJoin").addEventListener("click", () => goTo("signup"));
+
+    $("#intentChips").addEventListener("click", event => {
+      const chip = event.target.closest("[data-value]");
+      if (!chip) return;
+      state.intent = chip.dataset.value;
+      $$("#intentChips .chip").forEach(item => item.classList.toggle("selected", item === chip));
+    });
+
+    $("#interestChips").addEventListener("click", event => {
+      const chip = event.target.closest("[data-value]");
+      if (!chip) return;
+      const interest = chip.dataset.value;
+      if (state.interests.has(interest)) {
+        state.interests.delete(interest);
+        chip.classList.remove("selected");
+      } else {
+        state.interests.add(interest);
+        chip.classList.add("selected");
+      }
+    });
+
+    $("#signupForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const displayName = $("#displayName").value.trim();
+      const username = $("#username").value.trim().toLowerCase();
+      const age = $("#ageConfirm").value;
+      if (!displayName || !username || !age) return showToast("Fill in the required fields first.");
+      if (!/^[a-z0-9_]{3,20}$/.test(username)) return showToast("Username must be 3–20 letters, numbers or underscores.");
+      if (state.interests.size < 1) return showToast("Pick at least one interest so people can get to know you.");
+      if (!$("#termsCheck").checked) return showToast("Please confirm you understand this is a prototype.");
+      state.profile = {
+        displayName, username, age, city:$("#city").value.trim(),
+        bio:$("#bioInput").value.trim(), intent:state.intent, interests:[...state.interests]
+      };
+      saveLocal();
+      renderProfile();
+      $("#topJoin").classList.add("hide");
+      goTo("profile");
+      showToast("Your local profile preview is ready. No account was created.");
+    });
+
+    function renderProfile() {
+      const container = $("#profilePreview");
+      if (!state.profile) {
+        container.innerHTML = `<div class="profile-cover"></div><div class="profile-avatar">♡</div><div class="profile-content"><h2 style="margin:0 0 6px">Your profile is waiting.</h2><p>Make a profile preview to see how your corner of VYBE could look.</p><button class="btn btn-primary" data-go="signup">Create my profile</button></div>`;
+        container.querySelector("[data-go]").addEventListener("click", () => goTo("signup"));
+        return;
+      }
+      const p = state.profile;
+      const location = p.city ? escapeHTML(p.city) : "Location not added";
+      const interests = p.interests.map(i => `<span class="chip">${escapeHTML(i)}</span>`).join("");
+      container.innerHTML = `<div class="profile-cover"></div><div class="profile-avatar">${escapeHTML(p.displayName.charAt(0).toUpperCase())}</div><div class="profile-content"><div class="eyebrow">@${escapeHTML(p.username)}</div><h2 style="margin:5px 0">${escapeHTML(p.displayName)}</h2><div class="stat-row"><span class="stat-pill">${location}</span><span class="stat-pill">${escapeHTML(p.intent)}</span><span class="stat-pill">18+ member</span></div><p>${escapeHTML(p.bio || "Still figuring out what to put here. That's allowed.")}</p><div class="chip-row">${interests}</div><div class="divider"></div><p class="hint">This is a local preview on your device, not a public profile. Your exact age range isn't displayed. No follower or connection counts are shown.</p><button class="btn btn-outline btn-small" id="editProfile">Edit profile</button></div>`;
+      $("#editProfile").addEventListener("click", () => {
+        $("#displayName").value = p.displayName; $("#username").value = p.username;
+        $("#ageConfirm").value = p.age; $("#city").value = p.city || ""; $("#bioInput").value = p.bio || "";
+        state.intent = p.intent; state.interests = new Set(p.interests);
+        $$("#intentChips .chip").forEach(c => c.classList.toggle("selected", c.dataset.value === state.intent));
+        $$("#interestChips .chip").forEach(c => c.classList.toggle("selected", state.interests.has(c.dataset.value)));
+        goTo("signup");
+      });
+    }
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[char]));
+    }
+
+    $("#publishPost").addEventListener("click", () => {
+      const text = $("#postText").value.trim();
+      if (!text) return showToast("Write something first.");
+      state.posts.unshift({ id:crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), text, type:"text", createdAt:new Date().toISOString() });
+      $("#postText").value = "";
+      saveLocal(); renderPosts();
+      showToast("Added to your local preview. It isn't public.");
+    });
+
+    $("#publishVideo").addEventListener("click", () => {
+      const file = $("#videoFile").files[0];
+      if (!file) return showToast("Choose a video file first.");
+      if (!file.type.startsWith("video/")) return showToast("Choose a video file.");
+      if (file.size > 50 * 1024 * 1024) return showToast("For this prototype, choose a video under 50 MB.");
+      const videoUrl = URL.createObjectURL(file);
+      state.posts.unshift({ id:String(Date.now()), text:"", type:"video", caption:$("#videoCaption").value.trim(), createdAt:new Date().toISOString(), videoUrl, fileName:file.name });
+      $("#videoFile").value = ""; $("#videoCaption").value = "";
+      renderPosts();
+      showToast("Video preview added on this device only. It hasn't been uploaded.");
+    });
+
+    function renderPosts() {
+      const list = $("#postList");
+      if (!state.posts.length) {
+        list.innerHTML = `<div class="empty-card"><div class="empty-art">✿</div><h3>Your feed starts with you.</h3><p>No fake posts or pretend activity. Add a post above to test how the feed will feel.</p></div>`;
+        return;
+      }
+      list.innerHTML = state.posts.map(post => {
+        const date = new Date(post.createdAt).toLocaleString([], { dateStyle:"medium", timeStyle:"short" });
+        const author = state.profile ? escapeHTML(state.profile.displayName) : "Your preview";
+        const initial = state.profile ? escapeHTML(state.profile.displayName.charAt(0).toUpperCase()) : "♡";
+        const body = post.type === "video"
+          ? `<p class="post-body">${escapeHTML(post.caption || "")}</p><div class="video-box"><video controls playsinline preload="metadata" src="${post.videoUrl || ""}"></video></div><p class="hint">Local video preview · not uploaded</p>`
+          : `<p class="post-body">${escapeHTML(post.text)}</p>`;
+        return `<article class="post-card"><div class="post-meta"><div class="avatar-placeholder">${initial}</div><div><strong>${author}</strong><small>${date} · Only on this device</small></div></div>${body}<div class="post-actions"><button class="text-button" data-delete-post="${escapeHTML(post.id)}">Remove from preview</button><span class="hint" style="align-self:center">No public like counts</span></div></article>`;
+      }).join("");
+      $$("[data-delete-post]", list).forEach(button => button.addEventListener("click", () => {
+        const post = state.posts.find(item => item.id === button.dataset.deletePost);
+        if (post && post.videoUrl) URL.revokeObjectURL(post.videoUrl);
+        state.posts = state.posts.filter(item => item.id !== button.dataset.deletePost);
+        saveLocal(); renderPosts(); showToast("Removed from your preview.");
+      }));
+    }
+
+    $$(".community-pick").forEach(button => button.addEventListener("click", () => {
+      if (!state.profile) {
+        goTo("signup");
+        showToast(`Create a profile preview to save ${button.dataset.interest} as an interest.`);
+        return;
+      }
+      if (!state.profile.interests.includes(button.dataset.interest)) state.profile.interests.push(button.dataset.interest);
+      state.interests = new Set(state.profile.interests);
+      saveLocal(); renderProfile();
+      showToast(`${button.dataset.interest} added to your local profile preview.`);
+    }));
+
+    $("#themeToggle").addEventListener("click", () => {
+      state.mood = !state.mood;
+      if (state.mood) {
+        document.documentElement.style.setProperty("--cream", "#241b22");
+        document.documentElement.style.setProperty("--paper", "#322630");
+        document.documentElement.style.setProperty("--ink", "#fff5f8");
+        document.documentElement.style.setProperty("--muted", "#c7b3be");
+        document.documentElement.style.setProperty("--line", "#4c3945");
+        $("#themeToggle").textContent = "☀ Mood";
+      } else {
+        ["--cream","--paper","--ink","--muted","--line"].forEach((name, i) => {
+          const values = ["#fffaf6","#ffffff","#2b2026","#796a72","#f0dfe6"];
+          document.documentElement.style.setProperty(name, values[i]);
+        });
+        $("#themeToggle").textContent = "☾ Mood";
+      }
+    });
+
+    $("#clearLocal").addEventListener("click", () => {
+      if (!confirm("Clear the profile and text-post previews saved on this device? This cannot be undone.")) return;
+      state.profile = null; state.posts.forEach(post => { if (post.videoUrl) URL.revokeObjectURL(post.videoUrl); }); state.posts = [];
+      state.interests.clear(); state.intent = "Friendship";
+      try { localStorage.removeItem(STORAGE_KEY); } catch (error) {}
+      $("#signupForm").reset();
+      $$("#intentChips .chip").forEach((c, i) => c.classList.toggle("selected", i === 0));
+      $$("#interestChips .chip").forEach(c => c.classList.remove("selected"));
+      renderProfile(); renderPosts(); $("#topJoin").classList.remove("hide");
+      showToast("Local preview cleared.");
+    });
+
+    loadLocal();
+  </script>
+</body>
+</html>
